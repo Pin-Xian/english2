@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>單字練習本</title>
-<meta name="description" content="全民英檢中高級單字練習：單字卡、選擇題、聽寫、例句與文法，附發音。">
+<meta name="description" content="全民英檢、托福、多益、雅思單字練習：間隔複習、選擇題、聽寫、例句與文法，附發音。">
 <meta name="theme-color" content="#2a46c9">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
@@ -44,7 +44,9 @@ nav button{border:0;background:transparent;color:var(--muted);font:500 .92rem va
 nav button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .settings{display:flex;gap:10px 16px;flex-wrap:wrap;align-items:center;font-size:.85rem;color:var(--muted)}
-.settings label{display:flex;align-items:center;gap:6px}
+.settings label{display:flex;align-items:center;gap:6px;min-width:0;max-width:100%;white-space:nowrap}
+.settings select{min-width:0;max-width:100%}
+#level{max-width:calc(100vw - 100px)}
 select,input[type=text],input[type=search]{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
 input[type=range]{accent-color:var(--accent);width:90px}
 input[type=checkbox]{accent-color:var(--accent)}
@@ -95,6 +97,17 @@ input[type=checkbox]{accent-color:var(--accent)}
 .section-title{font-family:var(--display);font-weight:700;font-size:1.1rem;margin:0}
 .note{font-size:.8rem;color:var(--muted);margin:0}
 .search{width:100%}
+/* spaced review */
+.grades{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%}
+.btn.grade{min-width:0;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.3}
+.btn.grade small{font:400 .72rem var(--mono);color:var(--muted)}
+.stage{font-weight:500;letter-spacing:0;text-transform:none}
+.stage.new{color:var(--accent)} .stage.learn{color:var(--bad)} .stage.known{color:var(--good)}
+.mem{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.membar{display:flex;height:10px;border-radius:99px;overflow:hidden;background:var(--line)}
+.membar i{display:block;height:100%}
+.memkey{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.memkey .k{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 /* sentence practice */
 .seg{display:flex;flex-wrap:wrap;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:3px}
 .seg button{border:0;background:transparent;color:var(--muted);font:500 .85rem var(--body);padding:6px 10px;border-radius:8px;cursor:pointer}
@@ -134,11 +147,11 @@ input[type=checkbox]{accent-color:var(--accent)}
 <div class="wrap">
   <header>
     <h1><span>單字</span>練習本</h1>
-    <div class="stats"><span id="sLabel">中高級</span><span>單字 <b id="sTotal">0</b></span><span>熟悉 <b id="sKnown">0</b></span><span>待加強 <b id="sWeak">0</b></span></div>
+    <div class="stats"><span id="sLabel">中高級</span><span>單字 <b id="sTotal">0</b></span><span>今日待複習 <b id="sDue">0</b></span><span>已記住 <b id="sKnown">0</b></span></div>
   </header>
 
   <nav role="tablist">
-    <button role="tab" data-mode="cards" aria-selected="true">單字卡</button>
+    <button role="tab" data-mode="cards" aria-selected="true">複習</button>
     <button role="tab" data-mode="quiz" aria-selected="false">選擇題</button>
     <button role="tab" data-mode="dict" aria-selected="false">聽寫</button>
     <button role="tab" data-mode="sent" aria-selected="false">例句</button>
@@ -156,14 +169,22 @@ input[type=checkbox]{accent-color:var(--accent)}
   </div>
 
   <div class="settings" id="wordSettings">
-    <label>範圍 <select id="level">
-      <option value="2">中高級</option><option value="1">中級</option><option value="0">初級</option>
-      <option value="all">全部級數</option><option value="my">我的單字</option></select></label>
+    <div class="seg" role="group" aria-label="考試">
+      <button data-exam="gept" aria-pressed="true">全民英檢</button>
+      <button data-exam="toefl" aria-pressed="false">托福</button>
+      <button data-exam="toeic" aria-pressed="false">多益</button>
+      <button data-exam="ielts" aria-pressed="false">雅思</button>
+      <button data-exam="my" aria-pressed="false">我的單字</button>
+    </div>
+    <label>範圍 <select id="level"></select></label>
+  </div>
+  <div class="settings" id="quizSettings" hidden>
     <label><input id="weakOnly" type="checkbox"> 只練待加強</label>
     <label><input id="newFirst" type="checkbox" checked> 優先出沒練過的</label>
   </div>
   <div class="settings">
-    <label>每輪 <select id="size"><option>10</option><option selected>20</option><option>50</option><option>100</option></select> 題</label>
+    <label id="newPerDayWrap">每天新字 <select id="newPerDay"><option>5</option><option>10</option><option selected>20</option><option>30</option><option>50</option></select> 個</label>
+    <label id="sizeWrap" hidden>每輪 <select id="size"><option>10</option><option selected>20</option><option>50</option><option>100</option></select> 題</label>
     <label>口音 <select id="accent"><option value="en-US">美式</option><option value="en-GB">英式</option></select></label>
     <label>語速 <input id="rate" type="range" min="0.5" max="1.2" step="0.1" value="0.9"></label>
   </div>
@@ -172,10 +193,13 @@ input[type=checkbox]{accent-color:var(--accent)}
   <main id="view"></main>
   <p class="note" id="voiceNote"></p>
   <p class="note" id="offlineNote"></p>
-  <p class="note">單字來源：全民英檢中高級字表（含初級、中級），共 7,830 個詞條。</p>
+  <p class="note" id="sources">單字來源：全民英檢中高級字表（含初級、中級）；托福小黑書（12 單元）；托福分類字彙（33 學科）；多益必考單字 3,000；雅思 5000 字。</p>
 </div>
 
 <script src="words.js"></script>
+<script src="toefl.js"></script>
+<script src="toeic.js"></script>
+<script src="ielts.js"></script>
 <script src="sentences.js"></script>
 <script>
 const LV=['初級','中級','中高級'];
@@ -190,8 +214,17 @@ const k=w=>w.toLowerCase();
 /* ---------- data & storage ---------- */
 let store={custom:[],prog:{}};
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.prog)store=s;}catch(e){}
-const builtin=DATA.map(([w,pos,m,lv])=>({w,pos,m,lv:+lv}));
-const builtinSet=new Set(builtin.map(x=>k(x.w)));
+const builtin=DATA.map(([w,pos,m,lv])=>({w,pos,m,lv:+lv,ex:'gept'}));
+const TU=typeof TOEFL_UNITS!=='undefined'?TOEFL_UNITS:{};
+const TC=typeof TOEFL_CATS!=='undefined'?TOEFL_CATS:{};
+const nums=s=>s?String(s).split('.').map(Number):[];
+// 托福：[單字, 中文, 小黑書單元, 出現頻率, 分類字彙學科, 例句英文, 例句中文]
+const toefl=(typeof TOEFL!=='undefined'?TOEFL:[]).map(([w,m,u,f,c,xe,xz])=>({w,m,pos:'',u:nums(u),f:f||0,c:nums(c),xe,xz,ex:'toefl'}));
+const toeic=(typeof TOEIC!=='undefined'?TOEIC:[]).map(([w,pos,m],n)=>({w,pos,m,n,ex:'toeic'}));
+const TG=typeof TOEIC_GROUPS!=='undefined'?TOEIC_GROUPS:[];
+const ielts=(typeof IELTS!=='undefined'?IELTS:[]).map(([w,pos,m],n)=>({w,pos,m,n,ex:'ielts'}));
+const IG=typeof IELTS_GROUPS!=='undefined'?IELTS_GROUPS:[];
+const builtinSet=new Set([...builtin,...toefl,...toeic,...ielts].map(x=>k(x.w)));
 // carry over words and progress from the first version of this app
 try{const old=JSON.parse(localStorage.getItem('vocab-notebook-v1')||'null');
   if(old&&old.words&&!store.migrated){
@@ -199,9 +232,10 @@ try{const old=JSON.parse(localStorage.getItem('vocab-notebook-v1')||'null');
       if(!builtinSet.has(k(o.w))&&!store.custom.some(c=>k(c.w)===k(o.w)))store.custom.push({w:o.w,m:o.m,pos:o.pos||''})});
     store.migrated=true;}}catch(e){}
 let ALL=[];
-function rebuild(){ALL=[...store.custom.map(c=>({...c,lv:'my'})),...builtin]}
+function rebuild(){ALL=[...store.custom.map(c=>({...c,lv:'my',ex:'my'})),...builtin,...toefl,...toeic,...ielts]}
 rebuild();
 if(!store.sprog)store.sprog={};
+if(!store.srs)store.srs={};
 // 例句資料（sentences.js）；沒有載入時例句功能會自動隱藏
 const GR=typeof GRAMMAR!=='undefined'?GRAMMAR:[];
 const SS=typeof SENTS!=='undefined'?SENTS:[];
@@ -209,12 +243,85 @@ const GMAP=Object.fromEntries(GR.map(g=>[g.id,g]));
 const SENT_BY_WORD={};SS.forEach(s=>{(SENT_BY_WORD[k(s.w)]=SENT_BY_WORD[k(s.w)]||[]).push(s)});
 function save(){try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}renderStats()}
 const P=w=>store.prog[k(w.w)]||[0,0];
-const isWeak=w=>{const[c,x]=P(w);return x>0&&x>=c};
-const isKnown=w=>{const[c,x]=P(w);return c>=2&&c>x};
-const isNew=w=>{const[c,x]=P(w);return c+x===0};
-function mark(w,ok){const p=P(w).slice();ok?p[0]++:p[1]++;store.prog[k(w.w)]=p;save()}
-function inLevel(w){const l=$('#level').value;return l==='all'?true:l==='my'?w.lv==='my':w.lv===+l}
+const S=w=>store.srs[k(w.w)];
+const isWeak=w=>{const[c,x]=P(w);const s=S(w);return (x>0&&x>=c)||(!!s&&s.l>0&&s.i<7)};
+const isKnown=w=>{const s=S(w);return !!s&&s.i>=21};
+const isNew=w=>{const[c,x]=P(w);return c+x===0&&!S(w)};
+
+/* ---------- 間隔複習排程 ---------- */
+// 每個字的狀態：i=間隔天數(0=學習中), e=難易係數, d=下次複習時間, r=複習次數, l=忘記次數, st=學習步驟
+const DAY=864e5;
+const dayStart=(t=Date.now())=>{const d=new Date(t);d.setHours(0,0,0,0);return d.getTime()};
+const todayStr=()=>new Date().toLocaleDateString('sv');
+function today(){if(!store.today||store.today.date!==todayStr())store.today={date:todayStr(),nw:{},words:[]};if(typeof store.today.nw!=='object')store.today.nw={};return store.today}
+const isDue=w=>{const s=S(w);return !!s&&s.d<dayStart()+DAY};
+function fmtI(i){return i<=0?'這輪再看':i===1?'明天':i<30?i+' 天後':i<365?Math.round(i/30)+' 個月後':Math.round(i/365*10)/10+' 年後'}
+// g: 0忘了 1模糊 2記得 3很熟；回傳新狀態與「這輪幾張後再出現」(0 表示今天不再出現)
+function plan(w,g){
+  const old=S(w);const s=old?{...old}:{i:0,e:2.5,r:0,l:0,st:0};
+  let again=0;
+  if(s.i===0){            // 新字或學習中
+    if(g===0){s.st=0;again=3}
+    else if(g===1){again=5}
+    else if(g===2){if(s.st<1){s.st=1;again=8}else s.i=1}
+    else{s.i=old?2:4;s.e+=.15}
+  }else{                  // 已進入長期複習
+    if(g===0){s.l++;s.e=Math.max(1.3,s.e-.2);s.i=0;s.st=0;again=3}
+    else if(g===1){s.e=Math.max(1.3,s.e-.15);s.i=Math.max(1,Math.round(s.i*1.2))}
+    else if(g===2){s.i=Math.max(s.i+1,Math.round(s.i*s.e))}
+    else{s.i=Math.max(s.i+2,Math.round(s.i*s.e*1.3));s.e+=.15}
+  }
+  if(again){s.d=Date.now()}else{s.st=0;s.r++;s.d=dayStart()+s.i*DAY}
+  return {s,again,label:again?'這輪再看':fmtI(s.i)};
+}
+function grade(w,g){
+  const t=today();const key=k(w.w);
+  if(!S(w))t.nw[w.ex]=(t.nw[w.ex]||0)+1;
+  if(!t.words.includes(key))t.words.push(key);
+  const p=plan(w,g);store.srs[key]=p.s;
+  const pr=P(w).slice();g>=2?pr[0]++:pr[1]++;store.prog[key]=pr;
+  save();return p;
+}
+// 選擇題、聽寫的結果也會影響排程：答錯就排回今天複習
+function mark(w,ok){
+  const p=P(w).slice();ok?p[0]++:p[1]++;store.prog[k(w.w)]=p;
+  const s=S(w);
+  if(!ok){
+    if(!s||s.i>0)store.srs[k(w.w)]={...(s||{e:2.5,r:0,l:0}),i:0,st:0,l:(s?s.l+1:0),d:Date.now()};
+  }else if(s&&s.i>0&&isDue(w)){store.srs[k(w.w)]=plan(w,2).s}
+  save();
+}
+
+/* ---------- 考試與範圍 ---------- */
+const exam=()=>document.querySelector('[data-exam][aria-pressed="true"]').dataset.exam;
+const LEVELS={
+  gept:[['2','中高級'],['1','中級'],['0','初級'],['all','全部級數']],
+  toefl:[['all','全部'],['hi','高頻字（小黑書出現 10 次以上）'],
+    {g:'托福小黑書（12 單元）',items:[['b1','小黑書全部'],...Object.entries(TU).map(([n,name])=>['u'+n,'Unit '+n+' '+name.split(' ')[0]])]},
+    {g:'托福分類字彙（33 學科）',items:[['b2','分類字彙全部'],...Object.entries(TC).map(([n,name])=>['c'+n,n+'. '+name.split(' ').pop()+'（'+name.split(' ').slice(0,-1).join(' ')+'）'])]}],
+  toeic:[['all','全部'],...TG.map(([a,b,w1,w2],i)=>['g'+i,`第 ${a+1}–${b} 字（${w1} – ${w2}）`])],
+  ielts:[['all','全部'],...IG.map(([a,b,l1,l2],i)=>['g'+i,(l1===l2?l1:l1+'–'+l2)+` 開頭（${b-a} 字）`])],
+  my:[['all','全部']]
+};
+function fillLevels(keep){
+  const opt=([v,t])=>`<option value="${v}">${esc(t)}</option>`;
+  const sel=$('#level');sel.innerHTML=LEVELS[exam()].map(o=>o.g?`<optgroup label="${esc(o.g)}">${o.items.map(opt).join('')}</optgroup>`:opt(o)).join('');
+  if(keep&&[...sel.options].some(o=>o.value===keep))sel.value=keep;
+}
+function inLevel(w){
+  const ex=exam();if(w.ex!==ex)return false;
+  const l=$('#level').value;if(l==='all')return true;
+  if(ex==='gept')return w.lv===+l;
+  if(ex==='toefl'){
+    if(l==='hi')return w.f>=10;if(l==='b1')return w.u.length>0;if(l==='b2')return w.c.length>0;
+    const n=+l.slice(1);return l[0]==='u'?w.u.includes(n):w.c.includes(n);
+  }
+  if(ex==='toeic'||ex==='ielts'){const g=(ex==='toeic'?TG:IG)[+l.slice(1)];return !!g&&w.n>=g[0]&&w.n<g[1]}
+  return true;
+}
 function levelWords(){return ALL.filter(inLevel)}
+function scopeName(){const l=$('#level');const ex={gept:'英檢',toefl:'托福',toeic:'多益',ielts:'雅思',my:'我的單字'}[exam()];
+  return exam()==='my'?ex:ex+' · '+(l.options[l.selectedIndex]?.text||'').replace(/（.*）/,'')}
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function pool(){
   let ws=levelWords();
@@ -228,7 +335,7 @@ function pool(){
   }
   return shuffle(ws).slice(0,n);
 }
-const lvTag=w=>w.lv==='my'?'我的':LV[w.lv];
+const lvTag=w=>w.ex==='my'?'我的':w.ex==='toeic'?'多益':w.ex==='ielts'?'雅思':w.ex==='toefl'?'托福 '+(w.u.length&&!(w.c.length&&/^(c|b2)/.test($('#level').value))?(TU[w.u[0]]||'').split(' ')[0]:(TC[w.c[0]]||'').split(' ').pop()):'英檢'+LV[w.lv];
 
 /* ---------- speech ---------- */
 let voices=[];
@@ -249,29 +356,56 @@ function speak(text){
 document.addEventListener('click',e=>{const b=e.target.closest('[data-say]');if(b)speak(b.dataset.say)});
 
 /* ---------- prefs ---------- */
-const PREFS=['level','size','accent','rate','weakOnly','newFirst'];
-try{const p=JSON.parse(localStorage.getItem(KEY+'-prefs')||'{}');
-  PREFS.forEach(id=>{if(p[id]!==undefined){const el=$('#'+id);el.type==='checkbox'?el.checked=p[id]:el.value=p[id]}})}catch(e){}
-function savePrefs(){const p={};PREFS.forEach(id=>{const el=$('#'+id);p[id]=el.type==='checkbox'?el.checked:el.value});
+const PREFS=['size','accent','rate','weakOnly','newFirst','newPerDay'];
+function setExam(ex){document.querySelectorAll('[data-exam]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.exam===ex))}
+(function(){
+  let p={};try{p=JSON.parse(localStorage.getItem(KEY+'-prefs')||'{}')}catch(e){}
+  PREFS.forEach(id=>{if(p[id]!==undefined){const el=$('#'+id);el.type==='checkbox'?el.checked=p[id]:el.value=p[id]}});
+  let ex=p.exam||'gept',lv=p.level;
+  if(lv==='my'){ex='my';lv='all'}          // 舊版把「我的單字」放在範圍裡
+  if(!LEVELS[ex])ex='gept';
+  if(ex==='toefl'&&/^\d+$/.test(lv||''))lv='u'+lv;   // 第三版的托福單元編號
+  setExam(ex);fillLevels(lv);
+})();
+function savePrefs(){const p={exam:exam(),level:$('#level').value};PREFS.forEach(id=>{const el=$('#'+id);p[id]=el.type==='checkbox'?el.checked:el.value});
   try{localStorage.setItem(KEY+'-prefs',JSON.stringify(p))}catch(e){}}
 
 /* ---------- modes ---------- */
 let mode='cards',queue=[],idx=0,flipped=false,answered=false,round={right:0,total:0},q='';
 function setBar(){$('#bar').style.width=(mode!=='list'&&queue.length?Math.min(100,idx/queue.length*100):0)+'%'}
-function start(){queue=mode==='sent'?sentPool():pool();idx=0;flipped=false;answered=false;round={right:0,total:0};render()}
+let cram=false; // 瀏覽今天學過的字（不影響排程）
+function start(){queue=mode==='sent'?sentPool():mode==='cards'?srsPool():pool();idx=0;flipped=false;answered=false;round={right:0,total:0,g:[0,0,0,0]};render()}
+function newLeft(){return Math.max(0,+$('#newPerDay').value-(today().nw[exam()]||0))}
+function srsPool(extraNew){
+  if(cram){const set=new Set(today().words);return shuffle(ALL.filter(w=>set.has(k(w.w))&&w.ex===exam()).filter((w,i,a)=>a.findIndex(x=>k(x.w)===k(w.w))===i))}
+  const ws=levelWords();
+  const due=ws.filter(isDue).sort((a,b)=>S(a).d-S(b).d).slice(0,150);
+  let fresh=ws.filter(w=>!S(w));
+  fresh=exam()==='toefl'?fresh:shuffle(fresh);   // 托福依書中順序：小黑書高頻字在前
+  fresh=fresh.slice(0,extraNew||newLeft());
+  // 每 3 張複習卡插入 1 張新字
+  const q=[];let a=0,b=0;
+  while(a<due.length||b<fresh.length){
+    for(let n=0;n<3&&a<due.length;n++)q.push(due[a++]);
+    if(b<fresh.length)q.push(fresh[b++]);
+  }
+  return q;
+}
 
 function renderStats(){
-  const ws=levelWords();const l=$('#level');
-  $('#sLabel').textContent=l.options[l.selectedIndex].text;
+  const ws=levelWords();
+  $('#sLabel').textContent=scopeName();
   $('#sTotal').textContent=ws.length.toLocaleString();
+  $('#sDue').textContent=ws.filter(isDue).length.toLocaleString();
   $('#sKnown').textContent=ws.filter(isKnown).length.toLocaleString();
-  $('#sWeak').textContent=ws.filter(isWeak).length.toLocaleString();
 }
 
 function emptyView(){
-  const weak=$('#weakOnly').checked, my=$('#level').value==='my';
-  return `<section class="card"><div class="word" style="font-size:1.6rem">${weak?'目前沒有待加強的單字':'這個範圍還沒有單字'}</div>
-    <p class="hint">${weak?'先在單字卡或測驗中練習，答錯的字會自動出現在這裡。':my?'到「單字庫」新增你自己的單字。':'請換一個範圍。'}</p></section>`;
+  const weak=$('#weakOnly').checked, my=exam()==='my';
+  if(!levelWords().length)return `<section class="card"><div class="word" style="font-size:1.6rem">這個範圍還沒有單字</div>
+    <p class="hint">${my?'到「單字庫」新增你自己的單字，或一次貼上一整份單字表。':'請換一個範圍。'}</p></section>`;
+  return `<section class="card"><div class="word" style="font-size:1.6rem">目前沒有待加強的單字</div>
+    <p class="hint">先在複習或測驗中練習，答錯的字會自動出現在這裡。</p></section>`;
 }
 function doneView(label){
   return `<section class="card"><span class="tag">完成</span>
@@ -280,8 +414,10 @@ function doneView(label){
     <div class="row"><button class="btn primary" id="again">再練一輪</button></div></section>`;
 }
 function distractors(w){
-  let src=ALL.filter(o=>o!==w&&o.lv===w.lv&&o.m!==w.m);
-  if(src.length<3)src=ALL.filter(o=>o!==w&&o.m!==w.m);
+  const near=o=>o.ex===w.ex&&(w.ex==='gept'?o.lv===w.lv:w.ex==='toefl'?(o.u.some(x=>w.u.includes(x))||o.c.some(x=>w.c.includes(x))):true);
+  let src=ALL.filter(o=>o!==w&&k(o.w)!==k(w.w)&&o.m!==w.m&&near(o));
+  if(src.length<3)src=ALL.filter(o=>o!==w&&k(o.w)!==k(w.w)&&o.m!==w.m&&o.ex===w.ex);
+  if(src.length<3)src=ALL.filter(o=>o!==w&&k(o.w)!==k(w.w)&&o.m!==w.m);
   const pos0=w.pos.split('/')[0];
   const same=shuffle(src.filter(o=>o.pos.split('/')[0]===pos0)).slice(0,3);
   return same.length===3?same:[...same,...shuffle(src.filter(o=>!same.includes(o)))].slice(0,3);
@@ -292,26 +428,15 @@ function render(){
   const v=$('#view');
   if(mode==='list')return renderList();
   if(mode==='sent')return renderSent();
+  if(mode==='cards')return renderReview();
   if(!queue.length){v.innerHTML=emptyView();return}
   if(idx>=queue.length){
-    v.innerHTML=doneView(mode==='cards'?'這一輪的單字卡看完了。標成「不熟」的字會列入待加強。':'這一輪答對的題數。答錯的字已列入待加強。');
+    v.innerHTML=doneView('這一輪答對的題數。答錯的字已排進今天的複習。');
     $('#again').onclick=start;return;
   }
   const w=queue[idx];
   const head=extra=>`<span class="tag">${idx+1} / ${queue.length}${extra||''}</span><span class="lvl">${lvTag(w)}</span>`;
-  if(mode==='cards'){
-    v.innerHTML=`<section class="card">${head()}
-      <div class="word">${esc(w.w)}</div>
-      <button class="speak" data-say="${esc(w.w)}">${SPK}聽發音</button>
-      ${flipped?`${w.pos?`<span class="pos">${esc(w.pos)}</span>`:''}<div class="meaning">${esc(w.m)}</div>${wordExample(w)}`
-        :`<p class="hint">先想想意思，再翻面確認（空白鍵）</p>`}
-    </section>
-    <div class="row" style="margin-top:14px">${flipped?
-      `<button class="btn bad" id="no">不熟</button><button class="btn good" id="yes">記得了</button>`:
-      `<button class="btn primary" id="flip">翻面看意思</button>`}</div>`;
-    if(flipped){$('#no').onclick=()=>{mark(w,false);next()};$('#yes').onclick=()=>{mark(w,true);next()}}
-    else{$('#flip').onclick=()=>{flipped=true;render()};speak(w.w)}
-  }
+  if(false){}
   else if(mode==='quiz'){
     const opts=shuffle([w,...distractors(w)]);
     v.innerHTML=`<section class="card">${head(' · 選出中文意思')}
@@ -353,6 +478,61 @@ function render(){
 }
 function next(){idx++;flipped=false;answered=false;render()}
 
+/* ---------- 複習（間隔重複） ---------- */
+const GRADES=[['忘了','bad'],['模糊',''],['記得','good'],['很熟','']];
+function stageOf(w){const s=S(w);if(!s)return['新字','new'];if(s.i===0)return[s.l?'重新學習':'學習中','learn'];if(s.i>=21)return['已記住','known'];return['複習','rev']}
+function memoryBar(){
+  const ws=levelWords();let n=0,l=0,r=0,m=0;
+  ws.forEach(w=>{const s=S(w);if(!s)n++;else if(s.i===0)l++;else if(s.i>=21)m++;else r++});
+  const tot=ws.length||1,pc=x=>(x/tot*100).toFixed(2)+'%';
+  return `<div class="mem" aria-label="記憶狀態">
+    <div class="membar"><i style="width:${pc(m)};background:var(--good)"></i><i style="width:${pc(r)};background:var(--accent)"></i><i style="width:${pc(l)};background:var(--bad)"></i></div>
+    <div class="memkey"><span><b class="k" style="background:var(--good)"></b>已記住 ${m}</span><span><b class="k" style="background:var(--accent)"></b>複習中 ${r}</span><span><b class="k" style="background:var(--bad)"></b>學習中 ${l}</span><span><b class="k" style="background:var(--line)"></b>還沒學 ${n}</span></div></div>`;
+}
+function renderReview(){
+  const v=$('#view');
+  if(!levelWords().length){v.innerHTML=emptyView();return}
+  if(idx>=queue.length){
+    const tomorrow=levelWords().filter(w=>{const s=S(w);return s&&s.d>=dayStart()+DAY&&s.d<dayStart()+2*DAY}).length;
+    const tw=new Set(today().words);const studied=ALL.filter(w=>w.ex===exam()&&tw.has(k(w.w))).length;
+    v.innerHTML=`<section class="card"><span class="tag">${cram?'瀏覽完成':'今日完成'}</span>
+      <div class="word" style="font-size:1.8rem">${cram?'今天學過的字都看完了':queue.length?'今天的複習完成了':'今天沒有要複習的字'}</div>
+      <p class="hint">${round.total?`這一輪：忘了 ${round.g[0]}、模糊 ${round.g[1]}、記得 ${round.g[2]}、很熟 ${round.g[3]}。<br>`:''}明天有 ${tomorrow} 個字會回來複習。記得的字會隔越來越久才出現，這樣才能記到長期記憶裡。</p>
+      <div class="row">
+        ${studied?`<button class="btn" id="cramBtn">再瀏覽今天學的 ${studied} 個字</button>`:''}
+        ${levelWords().some(w=>!S(w))?`<button class="btn primary" id="moreNew">再學 10 個新字</button>`:''}
+      </div>
+      <p class="note">瀏覽今天學過的字不會改變排程，適合睡前或通勤時再看一次。</p></section>${memoryBar()}`;
+    $('#cramBtn')&&($('#cramBtn').onclick=()=>{cram=true;start()});
+    $('#moreNew')&&($('#moreNew').onclick=()=>{cram=false;queue=srsPool(10);idx=0;flipped=false;round={right:0,total:0,g:[0,0,0,0]};render()});
+    return;
+  }
+  const w=queue[idx];
+  const[stage,cls]=stageOf(w);
+  const left=queue.length-idx;
+  const tag=cram?`瀏覽 ${idx+1} / ${queue.length}`:`剩 ${left} 張 · <span class="stage ${cls}">${stage}</span>`;
+  let btns;
+  if(!flipped)btns=`<button class="btn primary" id="flip">翻面看意思</button>`;
+  else if(cram)btns=`<button class="btn primary" id="cnext">下一個 →</button>`;
+  else btns=`<div class="grades">${GRADES.map(([t,c],g)=>`<button class="btn grade ${c}" data-g="${g}">${t}<small>${plan(w,g).label}</small></button>`).join('')}</div>`;
+  v.innerHTML=`<section class="card"><span class="tag">${tag}</span><span class="lvl">${lvTag(w)}</span>
+      <div class="word">${esc(w.w)}</div>
+      <button class="speak" data-say="${esc(w.w)}">${SPK}聽發音</button>
+      ${flipped?`${w.pos?`<span class="pos">${esc(w.pos)}</span>`:''}<div class="meaning">${esc(w.m)}</div>${wordExample(w)}`
+        :`<p class="hint">先在心裡說出中文意思，再翻面確認（空白鍵）</p>`}
+    </section>
+    <div class="row" style="margin-top:14px">${btns}</div>
+    ${flipped&&!cram?'<p class="hint" style="margin:8px auto 0">誠實評分：想不起來就按「忘了」，它會在這一輪稍後再出現。（鍵盤 1–4）</p>':''}`;
+  if(!flipped){$('#flip').onclick=()=>{flipped=true;render()};speak(w.w);return}
+  if(cram){$('#cnext').onclick=next;return}
+  v.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{
+    const g=+b.dataset.g;const p=grade(w,g);
+    round.total++;round.g[g]++;
+    if(p.again)queue.splice(Math.min(queue.length,idx+1+p.again),0,w);
+    next();
+  });
+}
+
 /* ---------- 例句練習 ---------- */
 let sub='order',orderState=null;
 const SK=s=>s.en;
@@ -363,7 +543,12 @@ function highlight(s){
   return i<0?esc(s.en):esc(s.en.slice(0,i))+'<mark>'+esc(s.f)+'</mark>'+esc(s.en.slice(i+s.f.length));
 }
 function wordExample(w){
-  const list=SENT_BY_WORD[k(w.w)];if(!list)return'';
+  const list=SENT_BY_WORD[k(w.w)];
+  if(!list){
+    if(!w.xe)return'';
+    return `<p class="hint" style="margin:4px 0 0">${esc(w.xe)}${w.xz?'<br>'+esc(w.xz):''}</p>
+      <button class="speak ghost" data-say="${esc(w.xe)}">${SPK}念例句</button>`;
+  }
   const s=list[0];
   return `<p class="hint" style="margin:4px 0 0">${highlight(s)}<br>${esc(s.zh)}</p>
     <button class="speak ghost" data-say="${esc(s.en)}">${SPK}念例句</button>`;
@@ -540,7 +725,7 @@ function renderList(){
     });
     rebuild();save();
     const fb=$('#bfb');fb.className='feedback '+(added?'ok':'no');
-    fb.textContent=`加入 ${added} 個`+(dup?`，${dup} 個已經在單字庫裡`:'')+(bad?`，${bad} 行看不懂格式（需要英文 + 中文）`:'')+(added?'。在範圍選「我的單字」就能練習。':'。');
+    fb.textContent=`加入 ${added} 個`+(dup?`，${dup} 個已經在單字庫裡`:'')+(bad?`，${bad} 行看不懂格式（需要英文 + 中文）`:'')+(added?'。選「我的單字」就能練習。':'。');
     if(added)$('#bulk').value='';
     drawResults();
   };
@@ -566,6 +751,8 @@ function renderList(){
         (s.custom||[]).forEach(c=>{if(c&&c.w&&!have.has(k(c.w))&&!builtinSet.has(k(c.w))){store.custom.push(c);have.add(k(c.w))}});
         for(const key of ['prog','sprog'])Object.entries(s[key]||{}).forEach(([w,p])=>{
           const cur=store[key][w]||[0,0];store[key][w]=[Math.max(cur[0],p[0]|0),Math.max(cur[1],p[1]|0)]});
+        // 複習排程：保留複習次數比較多的那一份
+        Object.entries(s.srs||{}).forEach(([w,x])=>{const cur=store.srs[w];if(x&&typeof x.d==='number'&&(!cur||(x.r|0)>(cur.r|0)))store.srs[w]=x});
         rebuild();save();renderList();
         $('#xfb').className='feedback ok';$('#xfb').textContent='已匯入並合併備份。';
       }catch(err){$('#xfb').className='feedback no';$('#xfb').textContent='匯入失敗：'+err.message}
@@ -579,12 +766,12 @@ function renderList(){
     if(term)ws=ws.filter(w=>w.w.toLowerCase().includes(term)||w.m.includes(term));
     if(term)ws.sort((a,b)=>(b.w.toLowerCase().startsWith(term))-(a.w.toLowerCase().startsWith(term)));
     const shown=ws.slice(0,120);
-    $('#results').innerHTML=`<p class="note" style="margin-bottom:8px">共 ${ws.length.toLocaleString()} 筆${ws.length>shown.length?`，顯示前 ${shown.length} 筆，用搜尋找特定單字`:''}。紅點＝待加強，綠點＝已熟悉，數字是「答對 / 答錯」。</p>
-    ${shown.length?`<div class="list">${shown.map(w=>{const[c,x]=P(w);return `<div class="item">
+    $('#results').innerHTML=`<p class="note" style="margin-bottom:8px">共 ${ws.length.toLocaleString()} 筆${ws.length>shown.length?`，顯示前 ${shown.length} 筆，用搜尋找特定單字`:''}。紅點＝待加強，綠點＝已記住，右邊是下次複習的時間。</p>
+    ${shown.length?`<div class="list">${shown.map(w=>{const s=S(w);const due=!s?'—':s.d<dayStart()+DAY?'今天':fmtI(Math.round((s.d-dayStart())/DAY));return `<div class="item">
       <span class="dot ${isWeak(w)?'weak':isKnown(w)?'ok':''}"></span>
-      <div style="min-width:0"><div class="w">${esc(w.w)}<small>${lvTag(w)}</small></div><div class="m">${esc(w.pos)} ${esc(w.m)}</div></div>
-      <span class="score">${c}/${x}</span>
-      <span><button class="icon-btn" data-say="${esc(w.w)}" aria-label="念 ${esc(w.w)}">${SPK}</button>${w.lv==='my'?`<button class="icon-btn" data-del="${esc(w.w)}" aria-label="刪除 ${esc(w.w)}">${DEL}</button>`:''}</span>
+      <div style="min-width:0"><div class="w">${esc(w.w)}<small>${lvTag(w)}${w.ex==='toefl'&&w.f?' · 出現 '+w.f+' 次':''}</small></div><div class="m">${esc(w.pos)} ${esc(w.m)}</div></div>
+      <span class="score">${due}</span>
+      <span><button class="icon-btn" data-say="${esc(w.w)}" aria-label="念 ${esc(w.w)}">${SPK}</button>${w.ex==='my'?`<button class="icon-btn" data-del="${esc(w.w)}" aria-label="刪除 ${esc(w.w)}">${DEL}</button>`:''}</span>
     </div>`}).join('')}</div>`:''}`;
     $('#results').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
       store.custom=store.custom.filter(c=>c.w!==b.dataset.del);rebuild();save();drawResults()});
@@ -595,29 +782,38 @@ function renderList(){
     const fb=$('#lfb');
     if(ALL.some(x=>k(x.w)===k(w))){fb.className='feedback no';fb.textContent=`「${w}」已經在單字庫裡了。`;return}
     store.custom.unshift({w,m,pos:''});rebuild();save();
-    fb.className='feedback ok';fb.textContent=`已加入「${w}」，在範圍選「我的單字」就能練習。`;
+    fb.className='feedback ok';fb.textContent=`已加入「${w}」，選「我的單字」就能練習。`;
     $('#aw').value='';$('#am').value='';speak(w);drawResults()};
   let armed=false;
   $('#reset').onclick=()=>{if(!armed){armed=true;$('#reset').textContent='再按一次確認重設';return}
-    store.prog={};store.sprog={};save();renderList()};
+    store.prog={};store.sprog={};store.srs={};store.today=null;save();renderList()};
 }
 
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));
-  mode=b.dataset.mode;orderState=null;syncSettings();start()});
-function syncSettings(){$('#sentSettings').hidden=mode!=='sent';$('#wordSettings').hidden=mode==='sent'}
+  mode=b.dataset.mode;orderState=null;cram=false;syncSettings();start()});
+function syncSettings(){
+  $('#sentSettings').hidden=mode!=='sent';$('#wordSettings').hidden=mode==='sent';
+  $('#quizSettings').hidden=!(mode==='quiz'||mode==='dict'||mode==='list');
+  $('#newPerDayWrap').hidden=mode!=='cards';
+  $('#sizeWrap').hidden=!(mode==='quiz'||mode==='dict'||mode==='sent');
+  $('#newFirst').parentElement.hidden=mode==='list';
+}
+document.querySelectorAll('[data-exam]').forEach(b=>b.onclick=()=>{
+  setExam(b.dataset.exam);fillLevels();cram=false;savePrefs();renderStats();start()});
 GR.forEach(g=>{const o=document.createElement('option');o.value=g.id;o.textContent=g.name;$('#topic').appendChild(o)});
 if(!SS.length)document.querySelector('[data-mode="sent"]').hidden=true;
 $('#topic').onchange=()=>{orderState=null;start()};
-document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{
-  document.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+document.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('[data-sub]').forEach(x=>x.setAttribute('aria-pressed',x===b));
   sub=b.dataset.sub;orderState=null;start()});
-['level','size','weakOnly','newFirst'].forEach(id=>$('#'+id).addEventListener('change',()=>{savePrefs();renderStats();start()}));
+['level','size','weakOnly','newFirst','newPerDay'].forEach(id=>$('#'+id).addEventListener('change',()=>{cram=false;savePrefs();renderStats();start()}));
 ['accent','rate'].forEach(id=>$('#'+id).addEventListener('change',savePrefs));
 
 document.addEventListener('keydown',e=>{
   if(e.target.matches('input,select,textarea'))return;
-  if(mode==='cards'&&e.key===' '){e.preventDefault();if(!flipped&&idx<queue.length){flipped=true;render()}}
+  if(mode==='cards'&&e.key===' '){e.preventDefault();if(!flipped&&idx<queue.length){flipped=true;render()}else if(cram)$('#cnext')?.click()}
+  if(mode==='cards'&&flipped&&!cram&&/^[1-4]$/.test(e.key)){document.querySelector(`[data-g="${+e.key-1}"]`)?.click()}
   if((mode==='quiz'||(mode==='sent'&&sub==='cloze'))&&!answered&&/^[1-4]$/.test(e.key)){document.querySelectorAll('.opt')[+e.key-1]?.click()}
 });
 
