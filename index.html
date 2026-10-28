@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>單字練習本</title>
-<meta name="description" content="全民英檢中高級單字練習：單字卡、選擇題、聽寫，附發音。">
+<meta name="description" content="全民英檢中高級單字練習：單字卡、選擇題、聽寫、例句與文法，附發音。">
 <meta name="theme-color" content="#2a46c9">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
@@ -39,7 +39,7 @@ h1{font-family:var(--display);font-weight:800;font-size:1.9rem;margin:0;letter-s
 h1 span{background:linear-gradient(transparent 58%,var(--mark) 58%);padding:0 .1em}
 .stats{font-family:var(--mono);font-size:.78rem;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
 .stats b{color:var(--ink);font-weight:500}
-nav{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:4px}
+nav{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:4px}
 nav button{border:0;background:transparent;color:var(--muted);font:500 .92rem var(--body);padding:9px 4px;border-radius:9px;cursor:pointer}
 nav button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -95,6 +95,37 @@ input[type=checkbox]{accent-color:var(--accent)}
 .section-title{font-family:var(--display);font-weight:700;font-size:1.1rem;margin:0}
 .note{font-size:.8rem;color:var(--muted);margin:0}
 .search{width:100%}
+/* sentence practice */
+.seg{display:flex;flex-wrap:wrap;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{border:0;background:transparent;color:var(--muted);font:500 .85rem var(--body);padding:6px 10px;border-radius:8px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.card.sent{justify-content:flex-start;padding-top:44px;text-align:left;align-items:stretch;background-image:none}
+[hidden]{display:none!important}
+.answer .chip:disabled{opacity:1}
+.zh{font-size:1rem;color:var(--muted);margin:0}
+.en{font-family:var(--display);font-weight:500;font-size:clamp(1.15rem,4.6vw,1.45rem);line-height:1.45;margin:0}
+.en mark{background:linear-gradient(transparent 55%,var(--mark) 55%);color:inherit;font-weight:700}
+.blank{display:inline-block;min-width:5.5em;border-bottom:2px solid var(--accent);color:var(--accent);text-align:center;font-weight:700}
+.answer{min-height:56px;border:1.5px dashed var(--line);border-radius:12px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.answer.ok{border-style:solid;border-color:var(--good)} .answer.no{border-style:solid;border-color:var(--bad)}
+.bank{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.chip{border:1px solid var(--line);background:var(--bg);color:var(--ink);font:500 1rem var(--display);padding:7px 11px;border-radius:9px;cursor:pointer;min-height:40px}
+.chip:disabled{opacity:.25;cursor:default}
+.answer .chip{background:var(--paper);border-color:var(--accent)}
+.gnote{border-left:3px solid var(--accent);background:color-mix(in srgb,var(--accent) 7%,var(--paper));border-radius:0 12px 12px 0;padding:12px 14px;display:flex;flex-direction:column;gap:6px;text-align:left}
+.gnote h3{margin:0;font-size:.95rem;color:var(--accent)}
+.gnote .pat{font-family:var(--mono);font-size:.8rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:3px 8px;align-self:flex-start;max-width:100%;overflow-wrap:anywhere}
+.gnote p{margin:0;font-size:.92rem}
+.gnote details summary{cursor:pointer;color:var(--accent);font-size:.85rem}
+.gnote details p{margin-top:6px;color:var(--muted)}
+.topic{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.topic h2{font-family:var(--display);font-size:1.15rem;margin:0}
+.topic .ex{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:start;border-top:1px solid var(--line);padding-top:10px}
+.topic .ex p{margin:0}
+.topic .ex .why{grid-column:2;font-size:.85rem;color:var(--muted)}
+.tip{font-size:.85rem;color:var(--muted);margin:0}
+.tip b{color:var(--ink)}
+.bulk textarea{width:100%;min-height:120px;font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 10px;resize:vertical}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -110,18 +141,31 @@ input[type=checkbox]{accent-color:var(--accent)}
     <button role="tab" data-mode="cards" aria-selected="true">單字卡</button>
     <button role="tab" data-mode="quiz" aria-selected="false">選擇題</button>
     <button role="tab" data-mode="dict" aria-selected="false">聽寫</button>
+    <button role="tab" data-mode="sent" aria-selected="false">例句</button>
     <button role="tab" data-mode="list" aria-selected="false">單字庫</button>
   </nav>
 
-  <div class="settings">
+  <div class="settings" id="sentSettings" hidden>
+    <div class="seg" role="group" aria-label="例句練習方式">
+      <button data-sub="order" aria-pressed="true">句子重組</button>
+      <button data-sub="cloze" aria-pressed="false">克漏字</button>
+      <button data-sub="listen" aria-pressed="false">聽句子</button>
+      <button data-sub="notes" aria-pressed="false">文法筆記</button>
+    </div>
+    <label>文法主題 <select id="topic"><option value="all">全部主題</option></select></label>
+  </div>
+
+  <div class="settings" id="wordSettings">
     <label>範圍 <select id="level">
       <option value="2">中高級</option><option value="1">中級</option><option value="0">初級</option>
       <option value="all">全部級數</option><option value="my">我的單字</option></select></label>
-    <label>每輪 <select id="size"><option>20</option><option>50</option><option>100</option></select> 題</label>
+    <label><input id="weakOnly" type="checkbox"> 只練待加強</label>
+    <label><input id="newFirst" type="checkbox" checked> 優先出沒練過的</label>
+  </div>
+  <div class="settings">
+    <label>每輪 <select id="size"><option>10</option><option selected>20</option><option>50</option><option>100</option></select> 題</label>
     <label>口音 <select id="accent"><option value="en-US">美式</option><option value="en-GB">英式</option></select></label>
     <label>語速 <input id="rate" type="range" min="0.5" max="1.2" step="0.1" value="0.9"></label>
-    <label><input id="weakOnly" type="checkbox"> 只練待加強</label>
-    <label><input id="newFirst" type="checkbox" checked> 優先出沒練過的字</label>
   </div>
 
   <div class="progress"><i id="bar" style="width:0%"></i></div>
@@ -132,6 +176,7 @@ input[type=checkbox]{accent-color:var(--accent)}
 </div>
 
 <script src="words.js"></script>
+<script src="sentences.js"></script>
 <script>
 const LV=['初級','中級','中高級'];
 const SPK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg>';
@@ -156,6 +201,12 @@ try{const old=JSON.parse(localStorage.getItem('vocab-notebook-v1')||'null');
 let ALL=[];
 function rebuild(){ALL=[...store.custom.map(c=>({...c,lv:'my'})),...builtin]}
 rebuild();
+if(!store.sprog)store.sprog={};
+// 例句資料（sentences.js）；沒有載入時例句功能會自動隱藏
+const GR=typeof GRAMMAR!=='undefined'?GRAMMAR:[];
+const SS=typeof SENTS!=='undefined'?SENTS:[];
+const GMAP=Object.fromEntries(GR.map(g=>[g.id,g]));
+const SENT_BY_WORD={};SS.forEach(s=>{(SENT_BY_WORD[k(s.w)]=SENT_BY_WORD[k(s.w)]||[]).push(s)});
 function save(){try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}renderStats()}
 const P=w=>store.prog[k(w.w)]||[0,0];
 const isWeak=w=>{const[c,x]=P(w);return x>0&&x>=c};
@@ -207,7 +258,7 @@ function savePrefs(){const p={};PREFS.forEach(id=>{const el=$('#'+id);p[id]=el.t
 /* ---------- modes ---------- */
 let mode='cards',queue=[],idx=0,flipped=false,answered=false,round={right:0,total:0},q='';
 function setBar(){$('#bar').style.width=(mode!=='list'&&queue.length?Math.min(100,idx/queue.length*100):0)+'%'}
-function start(){queue=pool();idx=0;flipped=false;answered=false;round={right:0,total:0};render()}
+function start(){queue=mode==='sent'?sentPool():pool();idx=0;flipped=false;answered=false;round={right:0,total:0};render()}
 
 function renderStats(){
   const ws=levelWords();const l=$('#level');
@@ -240,6 +291,7 @@ function render(){
   setBar();
   const v=$('#view');
   if(mode==='list')return renderList();
+  if(mode==='sent')return renderSent();
   if(!queue.length){v.innerHTML=emptyView();return}
   if(idx>=queue.length){
     v.innerHTML=doneView(mode==='cards'?'這一輪的單字卡看完了。標成「不熟」的字會列入待加強。':'這一輪答對的題數。答錯的字已列入待加強。');
@@ -251,7 +303,7 @@ function render(){
     v.innerHTML=`<section class="card">${head()}
       <div class="word">${esc(w.w)}</div>
       <button class="speak" data-say="${esc(w.w)}">${SPK}聽發音</button>
-      ${flipped?`${w.pos?`<span class="pos">${esc(w.pos)}</span>`:''}<div class="meaning">${esc(w.m)}</div>`
+      ${flipped?`${w.pos?`<span class="pos">${esc(w.pos)}</span>`:''}<div class="meaning">${esc(w.m)}</div>${wordExample(w)}`
         :`<p class="hint">先想想意思，再翻面確認（空白鍵）</p>`}
     </section>
     <div class="row" style="margin-top:14px">${flipped?
@@ -301,6 +353,150 @@ function render(){
 }
 function next(){idx++;flipped=false;answered=false;render()}
 
+/* ---------- 例句練習 ---------- */
+let sub='order',orderState=null;
+const SK=s=>s.en;
+const SP=s=>store.sprog[SK(s)]||[0,0];
+function smark(s,ok){const p=SP(s).slice();ok?p[0]++:p[1]++;store.sprog[SK(s)]=p;save()}
+function highlight(s){
+  const i=s.en.indexOf(s.f);
+  return i<0?esc(s.en):esc(s.en.slice(0,i))+'<mark>'+esc(s.f)+'</mark>'+esc(s.en.slice(i+s.f.length));
+}
+function wordExample(w){
+  const list=SENT_BY_WORD[k(w.w)];if(!list)return'';
+  const s=list[0];
+  return `<p class="hint" style="margin:4px 0 0">${highlight(s)}<br>${esc(s.zh)}</p>
+    <button class="speak ghost" data-say="${esc(s.en)}">${SPK}念例句</button>`;
+}
+function sentPool(){
+  const t=$('#topic').value;
+  const ss=SS.filter(s=>t==='all'||s.g===t);
+  const n=+$('#size').value;
+  // 沒練過的優先，其次是答錯比較多的
+  const score=s=>{const[c,x]=SP(s);return c+x===0?0:x>=c?1:2};
+  return shuffle(ss).sort((a,b)=>score(a)-score(b)).slice(0,n).sort(()=>Math.random()-.5);
+}
+function gnote(s,open){
+  const g=GMAP[s.g];
+  return `<div class="gnote"><h3>文法重點：${esc(g.name)}</h3>
+    <span class="pat">${esc(g.pattern)}</span>
+    <p>${esc(s.note)}</p>
+    <details${open?' open':''}><summary>看完整文法說明</summary><p>${esc(g.rule)}</p><p><b>小提醒：</b>${esc(g.tip)}</p></details></div>`;
+}
+function sentHead(s,label){
+  return `<span class="tag">${idx+1} / ${queue.length} · ${label}</span><span class="lvl">${esc(GMAP[s.g].name.split(' ')[0])}</span>`;
+}
+function sentResult(s,ok,okText){
+  return `<p class="feedback ${ok?'ok':'no'}">${ok?okText:'再看一次正確的句子：'}</p>
+    <p class="en">${highlight(s)}</p><p class="zh">${esc(s.zh)}</p>
+    <div class="row" style="justify-content:flex-start"><button class="speak ghost" data-say="${esc(s.en)}">${SPK}念整句</button></div>
+    ${gnote(s,!ok)}`;
+}
+function renderSent(){
+  const v=$('#view');
+  if(!SS.length){v.innerHTML='<section class="card"><p class="hint">找不到例句資料（sentences.js）。</p></section>';return}
+  if(sub==='notes')return renderNotes();
+  if(!queue.length){v.innerHTML='<section class="card"><p class="hint">這個主題目前沒有例句。</p></section>';return}
+  if(idx>=queue.length){
+    v.innerHTML=doneView('這一輪的例句練完了。答錯的句子下一輪會優先出現。');
+    $('#again').onclick=start;return;
+  }
+  const s=queue[idx];
+  const nextBtn=`<div class="row" style="margin-top:14px"><button class="btn primary" id="nx" hidden>下一句 →</button></div>`;
+
+  if(sub==='order'){
+    if(!orderState||orderState.s!==s){
+      const toks=s.en.split(' ');
+      let order=shuffle(toks.map((t,i)=>i));
+      if(toks.length>2)while(order.every((x,i)=>x===i))order=shuffle(order);
+      orderState={s,toks,order,picked:[]};
+    }
+    const{toks,order,picked}=orderState;
+    v.innerHTML=`<section class="card sent">${sentHead(s,'句子重組')}
+      <p class="zh">${esc(s.zh)}</p>
+      <div class="answer" id="ans">${picked.length?picked.map((ti,pi)=>`<button class="chip" data-back="${pi}">${esc(toks[ti])}</button>`).join(''):'<span class="hint" style="align-self:center">依序點選下面的字，排出正確的英文句子</span>'}</div>
+      <div class="bank">${order.map(ti=>`<button class="chip" data-take="${ti}" ${picked.includes(ti)?'disabled':''}>${esc(toks[ti])}</button>`).join('')}</div>
+      <div class="row"><button class="btn" id="undo" ${picked.length?'':'disabled'}>清除重來</button><button class="btn" id="giveup">直接看答案</button></div>
+      <div id="res"></div></section>${nextBtn}`;
+    const finish=(given)=>{
+      answered=true;
+      const ok=!given&&picked.map(i=>toks[i]).join(' ')===s.en;
+      round.total++;if(ok)round.right++;smark(s,ok);
+      $('#ans').classList.add(ok?'ok':'no');
+      v.querySelectorAll('.chip,#undo,#giveup').forEach(b=>b.disabled=true);
+      $('#res').innerHTML=sentResult(s,ok,'排對了！');
+      speak(s.en);
+      $('#nx').hidden=false;$('#nx').focus();
+    };
+    v.querySelectorAll('[data-take]').forEach(b=>b.onclick=()=>{if(answered)return;picked.push(+b.dataset.take);
+      if(picked.length===toks.length){renderSent();finish(false)}else renderSent()});
+    v.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{if(answered)return;picked.splice(+b.dataset.back,1);renderSent()});
+    $('#undo').onclick=()=>{orderState.picked=[];renderSent()};
+    $('#giveup').onclick=()=>{if(!answered)finish(true)};
+    if(answered){ // 重新繪製後保持結果
+      const ok=picked.map(i=>toks[i]).join(' ')===s.en;
+      $('#ans').classList.add(ok?'ok':'no');v.querySelectorAll('.chip,#undo,#giveup').forEach(b=>b.disabled=true);
+      $('#res').innerHTML=sentResult(s,ok,'排對了！');$('#nx').hidden=false;
+    }
+    $('#nx').onclick=()=>{orderState=null;next()};
+  }
+
+  else if(sub==='cloze'){
+    const shape=f=>/ing$/.test(f)?'ing':/ed$/.test(f)?'ed':/s$/.test(f)?'s':'';
+    const others=shuffle(SS.filter(o=>o.f.toLowerCase()!==s.f.toLowerCase()&&k(o.w)!==k(s.w)));
+    const same=others.filter(o=>shape(o.f)===shape(s.f)&&/^[A-Z]/.test(o.f)===/^[A-Z]/.test(s.f));
+    const picks=[...new Set([...same,...others].map(o=>o.f))].slice(0,3);
+    const opts=shuffle([s.f,...picks]);
+    const i=s.en.indexOf(s.f);
+    const blanked=esc(s.en.slice(0,i))+'<span class="blank">?</span>'+esc(s.en.slice(i+s.f.length));
+    v.innerHTML=`<section class="card sent">${sentHead(s,'克漏字')}
+      <p class="en">${blanked}</p><p class="zh">${esc(s.zh)}</p>
+      <div class="options">${opts.map((o,j)=>`<button class="opt" data-i="${j}">${j+1}. ${esc(o)}</button>`).join('')}</div>
+      <div id="res"></div></section>${nextBtn}`;
+    v.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      if(answered)return;answered=true;
+      const ok=opts[+b.dataset.i]===s.f;
+      v.querySelectorAll('.opt').forEach((x,j)=>{if(opts[j]===s.f)x.classList.add('right')});
+      if(!ok)b.classList.add('wrong');
+      round.total++;if(ok)round.right++;smark(s,ok);
+      $('#res').innerHTML=sentResult(s,ok,'答對了！');speak(s.en);
+      $('#nx').hidden=false;$('#nx').focus();
+    });
+    $('#nx').onclick=next;
+  }
+
+  else if(sub==='listen'){
+    v.innerHTML=`<section class="card sent">${sentHead(s,'聽句子')}
+      <div class="row"><button class="speak" data-say="${esc(s.en)}">${SPK}播放句子</button></div>
+      <p class="hint" style="align-self:center">試著聽懂整句，或跟著唸一遍，再看答案</p>
+      <div id="res">${answered?'':`<div class="row"><button class="btn primary" id="show">顯示句子</button></div>`}</div>
+      </section><div class="row" style="margin-top:14px" id="rate2" hidden>
+        <button class="btn bad" id="no">沒聽懂</button><button class="btn good" id="yes">聽懂了</button></div>`;
+    speak(s.en);
+    $('#show').onclick=()=>{answered=true;
+      $('#res').innerHTML=`<p class="en">${highlight(s)}</p><p class="zh">${esc(s.zh)}</p>
+        <div class="row" style="justify-content:flex-start"><button class="speak ghost" data-say="${esc(s.en)}">${SPK}再聽一次</button></div>${gnote(s,false)}`;
+      $('#rate2').hidden=false;};
+    const done=ok=>{round.total++;if(ok)round.right++;smark(s,ok);next()};
+    $('#no').onclick=()=>done(false);$('#yes').onclick=()=>done(true);
+  }
+}
+function renderNotes(){
+  $('#bar').style.width='0%';
+  const t=$('#topic').value;
+  const gs=GR.filter(g=>t==='all'||g.id===t);
+  $('#view').innerHTML=`<div style="display:flex;flex-direction:column;gap:14px">${gs.map(g=>`
+    <section class="topic"><h2>${esc(g.name)}</h2>
+      <span class="pat" style="font-family:var(--mono);font-size:.82rem">${esc(g.pattern)}</span>
+      <p style="margin:0">${esc(g.rule)}</p>
+      <p class="tip"><b>小提醒：</b>${esc(g.tip)}</p>
+      ${SS.filter(s=>s.g===g.id).map(s=>`<div class="ex">
+        <button class="icon-btn" data-say="${esc(s.en)}" aria-label="念這一句">${SPK}</button>
+        <div><p>${highlight(s)}</p><p class="zh" style="font-size:.88rem">${esc(s.zh)}</p></div>
+        <p class="why">${esc(s.note)}</p></div>`).join('')}
+    </section>`).join('')}</div>`;
+}
+
 function renderList(){
   const v=$('#view');
   v.innerHTML=`<div style="display:flex;flex-direction:column;gap:14px">
@@ -311,10 +507,71 @@ function renderList(){
       <button class="btn primary">加入</button>
     </form>
     <p class="feedback" id="lfb"></p>
+    <details class="bulk"><summary class="section-title" style="cursor:pointer">一次新增很多單字</summary>
+      <p class="note" style="margin:8px 0">每行一個單字，英文和中文之間用逗號、Tab 或空格隔開。可以直接從 Excel 或 Google 試算表複製兩欄貼上。</p>
+      <textarea id="bulk" placeholder="resilient, 有韌性的&#10;meticulous, 一絲不苟的&#10;ubiquitous 無所不在的"></textarea>
+      <div class="row" style="justify-content:flex-start;margin-top:8px"><button class="btn primary" id="bulkAdd">全部加入</button></div>
+      <p class="feedback" id="bfb"></p>
+    </details>
     <h2 class="section-title">查詢單字</h2>
     <input type="search" class="search" id="q" placeholder="輸入英文或中文搜尋目前範圍" value="${esc(q)}">
     <div id="results"></div>
+    <h2 class="section-title">備份與換手機</h2>
+    <p class="note">學習紀錄存在這台裝置的瀏覽器裡。換手機或清除瀏覽器資料前，先匯出備份檔，再到新裝置匯入。</p>
+    <div class="row" style="justify-content:flex-start">
+      <button class="btn" id="exp">匯出備份</button>
+      <label class="btn" for="imp" style="display:inline-flex;align-items:center;justify-content:center">匯入備份</label>
+      <input type="file" id="imp" accept=".json,application/json" hidden>
+    </div>
+    <p class="feedback" id="xfb"></p>
     <div class="row"><button class="btn" id="reset">重設全部學習紀錄</button></div></div>`;
+  $('#bulkAdd').onclick=()=>{
+    const have=new Set(ALL.map(x=>k(x.w)));let added=0,dup=0,bad=0;
+    $('#bulk').value.split(/\r?\n/).forEach(line=>{
+      line=line.trim();if(!line)return;
+      let w,m;
+      const t=line.split(/\t|,|，/);
+      if(t.length>=2){w=t[0];m=t.slice(1).join('，')}
+      else{const i=line.search(/[㐀-鿿]/);if(i>0){w=line.slice(0,i);m=line.slice(i)}}
+      w=(w||'').trim();m=(m||'').trim();
+      if(!w||!m||!/[A-Za-z]/.test(w)){bad++;return}
+      if(have.has(k(w))){dup++;return}
+      have.add(k(w));store.custom.push({w,m,pos:''});added++;
+    });
+    rebuild();save();
+    const fb=$('#bfb');fb.className='feedback '+(added?'ok':'no');
+    fb.textContent=`加入 ${added} 個`+(dup?`，${dup} 個已經在單字庫裡`:'')+(bad?`，${bad} 行看不懂格式（需要英文 + 中文）`:'')+(added?'。在範圍選「我的單字」就能練習。':'。');
+    if(added)$('#bulk').value='';
+    drawResults();
+  };
+  $('#exp').onclick=()=>{
+    const data=JSON.stringify({app:'vocab-notebook',version:2,exported:new Date().toISOString(),store},null,1);
+    try{
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
+      a.download='單字練習本備份-'+new Date().toISOString().slice(0,10)+'.json';
+      document.body.appendChild(a);a.click();a.remove();
+      $('#xfb').className='feedback ok';$('#xfb').textContent='已下載備份檔。';
+    }catch(e){$('#xfb').className='feedback no';$('#xfb').textContent='無法下載備份檔：'+e.message}
+  };
+  $('#imp').onchange=e=>{
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onload=()=>{
+      try{
+        const d=JSON.parse(r.result);const s=d.store||d;
+        if(!s||typeof s.prog!=='object')throw new Error('這不是單字練習本的備份檔');
+        // 合併：自訂單字取聯集，練習次數取較大值
+        const have=new Set(store.custom.map(c=>k(c.w)));
+        (s.custom||[]).forEach(c=>{if(c&&c.w&&!have.has(k(c.w))&&!builtinSet.has(k(c.w))){store.custom.push(c);have.add(k(c.w))}});
+        for(const key of ['prog','sprog'])Object.entries(s[key]||{}).forEach(([w,p])=>{
+          const cur=store[key][w]||[0,0];store[key][w]=[Math.max(cur[0],p[0]|0),Math.max(cur[1],p[1]|0)]});
+        rebuild();save();renderList();
+        $('#xfb').className='feedback ok';$('#xfb').textContent='已匯入並合併備份。';
+      }catch(err){$('#xfb').className='feedback no';$('#xfb').textContent='匯入失敗：'+err.message}
+    };
+    r.readAsText(f);
+  };
   const drawResults=()=>{
     const term=q.trim().toLowerCase();
     let ws=levelWords();
@@ -342,22 +599,29 @@ function renderList(){
     $('#aw').value='';$('#am').value='';speak(w);drawResults()};
   let armed=false;
   $('#reset').onclick=()=>{if(!armed){armed=true;$('#reset').textContent='再按一次確認重設';return}
-    store.prog={};save();renderList()};
+    store.prog={};store.sprog={};save();renderList()};
 }
 
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));
-  mode=b.dataset.mode;start()});
+  mode=b.dataset.mode;orderState=null;syncSettings();start()});
+function syncSettings(){$('#sentSettings').hidden=mode!=='sent';$('#wordSettings').hidden=mode==='sent'}
+GR.forEach(g=>{const o=document.createElement('option');o.value=g.id;o.textContent=g.name;$('#topic').appendChild(o)});
+if(!SS.length)document.querySelector('[data-mode="sent"]').hidden=true;
+$('#topic').onchange=()=>{orderState=null;start()};
+document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  sub=b.dataset.sub;orderState=null;start()});
 ['level','size','weakOnly','newFirst'].forEach(id=>$('#'+id).addEventListener('change',()=>{savePrefs();renderStats();start()}));
 ['accent','rate'].forEach(id=>$('#'+id).addEventListener('change',savePrefs));
 
 document.addEventListener('keydown',e=>{
   if(e.target.matches('input,select,textarea'))return;
   if(mode==='cards'&&e.key===' '){e.preventDefault();if(!flipped&&idx<queue.length){flipped=true;render()}}
-  if(mode==='quiz'&&!answered&&/^[1-4]$/.test(e.key)){document.querySelectorAll('.opt')[+e.key-1]?.click()}
+  if((mode==='quiz'||(mode==='sent'&&sub==='cloze'))&&!answered&&/^[1-4]$/.test(e.key)){document.querySelectorAll('.opt')[+e.key-1]?.click()}
 });
 
-save();start();
+syncSettings();save();start();
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').then(()=>{
     $('#offlineNote').textContent='已可離線使用：開過一次後，沒有網路也能練習。學習紀錄存在這台裝置上。';
