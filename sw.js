@@ -1,6 +1,6 @@
 // 讓網頁可以離線使用：先用快取，背景更新
-const CACHE = 'vocab-v5';
-const FILES = ['./', 'index.html', 'words.js', 'toefl.js', 'toeic.js', 'ielts.js', 'sentences.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
+const CACHE = 'vocab-v6';
+const FILES = ['./', 'index.html', 'words.js', 'toefl.js', 'toeic.js', 'ielts.js', 'sentences.js', 'examples.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
